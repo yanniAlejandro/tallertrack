@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Lint, tipos, tests y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Valores ficticios: el build no se conecta a Supabase (todas las páginas son dinámicas).
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://ejemplo.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: clave-anon-ficticia-para-ci
+      NEXT_PUBLIC_DEMO_MODE: 'true'
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Formato (Prettier)
+        run: npm run format:check
+
+      - name: Tipos (TypeScript)
+        run: npm run typecheck
+
+      - name: Tests (Vitest)
+        run: npm run test
+
+      - name: Build (Next.js)
+        run: npm run build
