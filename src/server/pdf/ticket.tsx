@@ -1,5 +1,14 @@
 import 'server-only';
-import { Document, Image, Page, StyleSheet, Text, View, renderToBuffer } from '@react-pdf/renderer';
+import {
+  Document,
+  Font,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+  renderToBuffer,
+} from '@react-pdf/renderer';
 import { formatearCup, formatearUsd, usdACup } from '@/domain/dinero';
 import { formatearFecha, formatearFechaHora } from '@/domain/fechas';
 import { ETIQUETA_DESBLOQUEO, type TipoDesbloqueo } from '@/domain/desbloqueo';
@@ -29,6 +38,9 @@ export interface DatosTicket {
 // Las fuentes estándar del PDF (Helvetica) no tienen el espacio fino U+202F.
 const pdf = (texto: string) => texto.replace(/ /g, ' ');
 const MM = 72 / 25.4;
+
+// react-pdf separa sílabas con reglas del inglés («manip-ulación»): se desactiva.
+Font.registerHyphenationCallback((palabra) => [palabra]);
 
 const s = StyleSheet.create({
   pagina80: {
