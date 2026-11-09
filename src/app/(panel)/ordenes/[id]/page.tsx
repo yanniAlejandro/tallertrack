@@ -16,7 +16,14 @@ import { SubirFotos } from '@/components/ordenes/detalle/subir-fotos';
 import { GaleriaFotos } from '@/components/ordenes/detalle/galeria-fotos';
 import { BotonesTicket } from '@/components/ordenes/detalle/botones-ticket';
 import { PiezasOrden } from '@/components/ordenes/detalle/piezas-orden';
-import { eventosDeOrden, obtenerOrden, piezasDeOrden } from '@/server/repositorios/ordenes';
+import { TarjetaGarantia } from '@/components/garantia/tarjeta-garantia';
+import {
+  eventosDeOrden,
+  obtenerOrden,
+  ordenesRelacionadas,
+  piezasDeOrden,
+} from '@/server/repositorios/ordenes';
+import { tieneGarantiaAbierta } from '@/server/repositorios/garantia';
 import { piezasDisponibles } from '@/server/repositorios/piezas';
 import { fotosDeOrden } from '@/server/repositorios/fotos';
 import { listarTecnicos } from '@/server/repositorios/perfiles';
@@ -47,6 +54,10 @@ export default async function DetalleOrden({ params, searchParams }: PageProps<'
     piezasDisponibles(),
   ]);
   if (!orden) notFound();
+  const [relacionadas, garantiaAbierta] = await Promise.all([
+    ordenesRelacionadas(orden),
+    tieneGarantiaAbierta(orden.id),
+  ]);
 
   const cerrada = estaCerrada(orden.estado);
   const totales = totalesOrden(
@@ -183,6 +194,17 @@ export default async function DetalleOrden({ params, searchParams }: PageProps<'
                 modelo={orden.equipo?.modelo ?? ''}
                 editable={!cerrada}
                 esGarantia={orden.es_garantia}
+              />
+            </CuerpoTarjeta>
+          </Tarjeta>
+
+          <Tarjeta>
+            <CabeceraTarjeta titulo="Garantía" />
+            <CuerpoTarjeta>
+              <TarjetaGarantia
+                orden={orden}
+                relacionadas={relacionadas}
+                tieneGarantiaAbierta={garantiaAbierta}
               />
             </CuerpoTarjeta>
           </Tarjeta>
