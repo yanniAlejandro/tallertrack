@@ -1,0 +1,23 @@
+'use client';
+import { useFormStatus } from 'react-dom';
+import type { ComponentProps } from 'react';
+import { Boton } from './boton';
+import { Spinner } from './spinner';
+
+type Props = ComponentProps<typeof Boton> & { textoCargando?: string };
+
+/** Botón de envío que se deshabilita y muestra progreso mientras el formulario se procesa. */
+export function BotonEnviar({ children, textoCargando = 'Guardando…', disabled, ...props }: Props) {
+  const { pending } = useFormStatus();
+  return (
+    <Boton type="submit" disabled={pending || disabled} aria-busy={pending} {...props}>
+      {pending ? (
+        <>
+          <Spinner /> {textoCargando}
+        </>
+      ) : (
+        children
+      )}
+    </Boton>
+  );
+}
