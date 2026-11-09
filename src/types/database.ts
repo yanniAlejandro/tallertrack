@@ -309,6 +309,34 @@ export type Database = {
     Views: {
       v_ordenes: Vista<VOrdenRow>;
       v_ordenes_por_estado: Vista<{ estado: Enums['estado_orden']; cantidad: number }>;
+      v_ingresos_mensuales: Vista<{
+        mes: string;
+        ordenes: number;
+        ingresos_usd: number;
+        ingresos_cup: number;
+        costo_piezas_usd: number;
+        ganancia_usd: number;
+      }>;
+      v_ganancia_piezas: Vista<{
+        pieza_id: string;
+        sku: string;
+        nombre: string;
+        categoria: Enums['categoria_pieza'];
+        unidades: number;
+        ingresos_usd: number;
+        costo_usd: number;
+        ganancia_usd: number;
+      }>;
+      v_rendimiento_tecnicos: Vista<{
+        tecnico_id: string;
+        nombre: string;
+        asignadas: number;
+        en_curso: number;
+        entregadas: number;
+        dias_promedio: number | null;
+        retornos_garantia: number;
+        ingresos_usd: number;
+      }>;
     };
     Functions: {
       es_personal: { Args: never; Returns: boolean };
