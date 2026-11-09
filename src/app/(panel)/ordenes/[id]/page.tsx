@@ -15,11 +15,14 @@ import { VerDesbloqueo } from '@/components/ordenes/detalle/ver-desbloqueo';
 import { SubirFotos } from '@/components/ordenes/detalle/subir-fotos';
 import { GaleriaFotos } from '@/components/ordenes/detalle/galeria-fotos';
 import { BotonesTicket } from '@/components/ordenes/detalle/botones-ticket';
-import { eventosDeOrden, obtenerOrden } from '@/server/repositorios/ordenes';
+import { PiezasOrden } from '@/components/ordenes/detalle/piezas-orden';
+import { eventosDeOrden, obtenerOrden, piezasDeOrden } from '@/server/repositorios/ordenes';
+import { piezasDisponibles } from '@/server/repositorios/piezas';
 import { fotosDeOrden } from '@/server/repositorios/fotos';
 import { listarTecnicos } from '@/server/repositorios/perfiles';
 import { obtenerAjustes } from '@/server/repositorios/ajustes';
 import { estaCerrada } from '@/domain/estados';
+import { totalesOrden } from '@/domain/inventario';
 import { enlaceWhatsApp, mensajeSegunEstado } from '@/domain/whatsapp';
 import { rutaEstado } from '@/domain/codigo-orden';
 import { envPublico } from '@/lib/env';
@@ -34,17 +37,27 @@ export async function generateMetadata({ params }: PageProps<'/ordenes/[id]'>): 
 export default async function DetalleOrden({ params, searchParams }: PageProps<'/ordenes/[id]'>) {
   const [{ id }, { nueva }] = await Promise.all([params, searchParams]);
   if (!esUuid(id)) notFound();
-  const [orden, eventos, fotos, tecnicos, ajustes] = await Promise.all([
+  const [orden, eventos, fotos, tecnicos, ajustes, lineas, disponibles] = await Promise.all([
     obtenerOrden(id),
     eventosDeOrden(id),
     fotosDeOrden(id),
     listarTecnicos(),
     obtenerAjustes(),
+    piezasDeOrden(id),
+    piezasDisponibles(),
   ]);
   if (!orden) notFound();
 
   const cerrada = estaCerrada(orden.estado);
-  const totalUsd = orden.mano_obra_usd;
+  const totales = totalesOrden(
+    lineas.map((l) => ({
+      cantidad: l.cantidad,
+      costoUnitUsd: l.costo_unit_usd,
+      precioUnitUsd: l.precio_unit_usd,
+    })),
+    orden.mano_obra_usd,
+  );
+  const totalUsd = totales.totalUsd;
   const equipo = `${orden.equipo?.marca ?? ''} ${orden.equipo?.modelo ?? ''}`.trim();
   const avisoWhatsApp = orden.cliente
     ? enlaceWhatsApp(
@@ -147,12 +160,29 @@ export default async function DetalleOrden({ params, searchParams }: PageProps<'
                 ordenId={orden.id}
                 presupuestoUsd={orden.presupuesto_usd}
                 manoObraUsd={orden.mano_obra_usd}
-                piezasUsd={0}
+                piezasUsd={totales.piezasUsd}
                 tasa={orden.tasa_aplicada}
                 tecnicoId={orden.tecnico_id}
                 fechaPrometida={orden.fecha_prometida}
                 tecnicos={tecnicos}
                 editable={!cerrada}
+              />
+            </CuerpoTarjeta>
+          </Tarjeta>
+
+          <Tarjeta>
+            <CabeceraTarjeta
+              titulo="Piezas"
+              descripcion="Se descuentan del inventario al usarlas."
+            />
+            <CuerpoTarjeta>
+              <PiezasOrden
+                ordenId={orden.id}
+                lineas={lineas}
+                disponibles={disponibles}
+                modelo={orden.equipo?.modelo ?? ''}
+                editable={!cerrada}
+                esGarantia={orden.es_garantia}
               />
             </CuerpoTarjeta>
           </Tarjeta>

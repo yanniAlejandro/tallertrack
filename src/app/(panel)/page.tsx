@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, Clock, Wrench } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, PackageX, Wrench } from 'lucide-react';
 import { EncabezadoPagina } from '@/components/ui/encabezado-pagina';
 import { Tarjeta, CabeceraTarjeta } from '@/components/ui/tarjeta';
 import { Vacio } from '@/components/ui/vacio';
@@ -7,15 +7,18 @@ import { Aviso } from '@/components/ui/aviso';
 import { BotonEnlace } from '@/components/ui/boton';
 import { ListaOrdenes } from '@/components/ordenes/lista-ordenes';
 import { contarAtrasadas, conteoPorEstado, resumenTablero } from '@/server/repositorios/ordenes';
+import { piezasConStockBajo } from '@/server/repositorios/piezas';
 import { requerirPerfil } from '@/server/sesion';
+import { ETIQUETA_CATEGORIA } from '@/domain/inventario';
 import { formatearFecha, hoyEnLaHabana } from '@/domain/fechas';
 
 export default async function Tablero({ searchParams }: PageProps<'/'>) {
-  const [perfil, resumen, conteo, atrasadas, { error }] = await Promise.all([
+  const [perfil, resumen, conteo, atrasadas, stockBajo, { error }] = await Promise.all([
     requerirPerfil(),
     resumenTablero(),
     conteoPorEstado(),
     contarAtrasadas(),
+    piezasConStockBajo(),
     searchParams,
   ]);
 
@@ -118,7 +121,49 @@ export default async function Tablero({ searchParams }: PageProps<'/'>) {
           )}
         </Tarjeta>
 
-        <Tarjeta className="lg:col-span-2">
+        <Tarjeta>
+          <CabeceraTarjeta
+            titulo="Piezas con stock bajo"
+            accion={
+              <Link
+                href="/inventario?bajas=1"
+                className="text-sm font-medium text-marca-700 hover:underline"
+              >
+                Ver todas
+              </Link>
+            }
+          />
+          {stockBajo.length ? (
+            <ul className="divide-y divide-slate-100">
+              {stockBajo.slice(0, 6).map((p) => (
+                <li key={p.id}>
+                  <Link
+                    href={`/inventario/${p.id}`}
+                    className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 sm:px-5"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-slate-900">
+                        {p.nombre}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {ETIQUETA_CATEGORIA[p.categoria]} · mínimo {p.stock_minimo}
+                      </span>
+                    </span>
+                    <span
+                      className={`text-sm font-bold tabular-nums ${p.stock === 0 ? 'text-red-600' : 'text-amber-600'}`}
+                    >
+                      {p.stock === 0 ? 'Agotada' : `${p.stock} ud.`}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Vacio icono={<PackageX />} titulo="Inventario en orden" />
+          )}
+        </Tarjeta>
+
+        <Tarjeta>
           <CabeceraTarjeta
             titulo="Últimas recepciones"
             accion={
