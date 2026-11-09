@@ -116,7 +116,9 @@ create or replace function public.cambiar_estado(
 )
 returns public.ordenes_servicio
 language plpgsql
-security invoker
+-- definer: el historial de estados no se puede escribir directamente (la RLS
+-- solo permite insertar notas); esta función es la única vía y valida permisos.
+security definer
 set search_path = ''
 as $$
 declare
@@ -201,3 +203,6 @@ $$;
 
 revoke all on function public.estado_publico(text) from public;
 grant execute on function public.estado_publico(text) to anon, authenticated;
+
+revoke all on function public.cambiar_estado(uuid, public.estado_orden, text, boolean) from public, anon;
+grant execute on function public.cambiar_estado(uuid, public.estado_orden, text, boolean) to authenticated;
