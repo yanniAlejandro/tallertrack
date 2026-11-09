@@ -2,7 +2,15 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/database';
 
-const RUTAS_PUBLICAS = ['/login', '/estado', '/manifest.webmanifest', '/sw.js', '/offline'];
+const RUTAS_PUBLICAS = [
+  '/login',
+  '/estado',
+  '/offline',
+  '/manifest.webmanifest',
+  '/sw.js',
+  '/icon',
+  '/apple-icon',
+];
 
 function esPublica(ruta: string) {
   return RUTAS_PUBLICAS.some((r) => ruta === r || ruta.startsWith(`${r}/`));
