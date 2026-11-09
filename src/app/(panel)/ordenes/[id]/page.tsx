@@ -14,6 +14,7 @@ import { Historial } from '@/components/ordenes/detalle/historial';
 import { VerDesbloqueo } from '@/components/ordenes/detalle/ver-desbloqueo';
 import { SubirFotos } from '@/components/ordenes/detalle/subir-fotos';
 import { GaleriaFotos } from '@/components/ordenes/detalle/galeria-fotos';
+import { BotonesTicket } from '@/components/ordenes/detalle/botones-ticket';
 import { eventosDeOrden, obtenerOrden } from '@/server/repositorios/ordenes';
 import { fotosDeOrden } from '@/server/repositorios/fotos';
 import { listarTecnicos } from '@/server/repositorios/perfiles';
@@ -81,11 +82,14 @@ export default async function DetalleOrden({ params, searchParams }: PageProps<'
         }
         descripcion={`${equipo} · ${orden.cliente?.nombre}`}
         acciones={
-          avisoWhatsApp && (
-            <BotonEnlaceExterno href={avisoWhatsApp} variante="whatsapp">
-              <MessageCircle aria-hidden /> Avisar al cliente
-            </BotonEnlaceExterno>
-          )
+          <>
+            <BotonesTicket ordenId={orden.id} />
+            {avisoWhatsApp && (
+              <BotonEnlaceExterno href={avisoWhatsApp} variante="whatsapp">
+                <MessageCircle aria-hidden /> Avisar al cliente
+              </BotonEnlaceExterno>
+            )}
+          </>
         }
       />
 
