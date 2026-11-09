@@ -1,9 +1,9 @@
 'use client';
 
-import { useActionState, useRef } from 'react';
+import { useRef } from 'react';
 import { KeyRound } from 'lucide-react';
 import { iniciarSesion } from '@/server/acciones/auth';
-import { ESTADO_INICIAL } from '@/server/resultado';
+import { useAccion } from '@/components/ui/use-accion';
 import { Campo, Entrada } from '@/components/ui/campo';
 import { BotonEnviar } from '@/components/ui/boton-enviar';
 import { Aviso } from '@/components/ui/aviso';
@@ -11,9 +11,8 @@ import { Aviso } from '@/components/ui/aviso';
 export const CREDENCIALES_DEMO = { email: 'admin@demo.cu', password: 'demo1234' };
 
 export function FormularioLogin({ volver, demo }: { volver: string | undefined; demo: boolean }) {
-  const [estado, accion] = useActionState(iniciarSesion, ESTADO_INICIAL);
+  const { estado, errores, onSubmit, pendiente } = useAccion(iniciarSesion);
   const form = useRef<HTMLFormElement>(null);
-  const errores = estado.ok ? undefined : estado.errores;
 
   function usarDemo() {
     const f = form.current;
@@ -46,7 +45,7 @@ export function FormularioLogin({ volver, demo }: { volver: string | undefined; 
         </div>
       )}
 
-      <form ref={form} action={accion} className="space-y-4" noValidate>
+      <form ref={form} onSubmit={onSubmit} className="space-y-4" noValidate>
         {volver && <input type="hidden" name="volver" value={volver} />}
         {!estado.ok && !errores && <Aviso tipo="error">{estado.error}</Aviso>}
         <Campo etiqueta="Correo electrónico" nombre="email" error={errores?.email}>
@@ -57,7 +56,7 @@ export function FormularioLogin({ volver, demo }: { volver: string | undefined; 
         <Campo etiqueta="Contraseña" nombre="password" error={errores?.password}>
           {(p) => <Entrada {...p} type="password" autoComplete="current-password" required />}
         </Campo>
-        <BotonEnviar className="w-full" tamano="lg" textoCargando="Entrando…">
+        <BotonEnviar pendiente={pendiente} className="w-full" tamano="lg" textoCargando="Entrando…">
           Entrar
         </BotonEnviar>
       </form>
