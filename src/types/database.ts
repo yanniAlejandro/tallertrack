@@ -361,6 +361,7 @@ export type Database = {
         Returns: PiezaRow;
       };
       reabrir_en_garantia: { Args: { p_orden_id: string; p_falla: string }; Returns: OrdenRow };
+      vaciar_datos_demo: { Args: never; Returns: undefined };
     };
     Enums: Enums;
     CompositeTypes: Record<string, never>;
