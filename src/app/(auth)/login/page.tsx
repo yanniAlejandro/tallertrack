@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Wrench } from 'lucide-react';
 import { FormularioLogin } from './formulario-login';
 import { esModoDemo } from '@/lib/env';
@@ -27,9 +28,9 @@ export default async function PaginaLogin({ searchParams }: PageProps<'/login'>)
 
         <p className="mt-6 text-center text-sm text-marca-200">
           ¿Es cliente? Consulte el estado de su equipo en{' '}
-          <a href="/estado" className="font-medium text-white underline underline-offset-2">
+          <Link href="/estado" className="font-medium text-white underline underline-offset-2">
             /estado
-          </a>
+          </Link>
           .
         </p>
       </div>
