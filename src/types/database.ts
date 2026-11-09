@@ -323,6 +323,15 @@ export type Database = {
         Returns: OrdenRow;
       };
       estado_publico: { Args: { p_codigo: string }; Returns: Json };
+      usar_pieza: {
+        Args: { p_orden_id: string; p_pieza_id: string; p_cantidad?: number };
+        Returns: OrdenPiezaRow;
+      };
+      devolver_pieza: { Args: { p_orden_pieza_id: number }; Returns: undefined };
+      ajustar_stock: {
+        Args: { p_pieza_id: string; p_delta: number; p_motivo: string };
+        Returns: PiezaRow;
+      };
     };
     Enums: Enums;
     CompositeTypes: Record<string, never>;
