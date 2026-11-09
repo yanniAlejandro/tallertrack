@@ -332,6 +332,7 @@ export type Database = {
         Args: { p_pieza_id: string; p_delta: number; p_motivo: string };
         Returns: PiezaRow;
       };
+      reabrir_en_garantia: { Args: { p_orden_id: string; p_falla: string }; Returns: OrdenRow };
     };
     Enums: Enums;
     CompositeTypes: Record<string, never>;
